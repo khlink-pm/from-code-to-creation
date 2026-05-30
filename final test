@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>期末项目：STM32智能桌面宠物</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Microsoft YaHei", sans-serif;
+  background: #120a25;
+  color: #f0e8ff;
+  line-height: 1.8;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+h1 {
+  font-size: 32px;
+  color: #d0bfff;
+  margin-bottom: 10px;
+}
+
+p {
+  font-size: 16px;
+  margin-bottom: 16px;
+  color: #e0d8ff;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 30px;
+  color: #bbaaff;
+  text-decoration: none;
+}
+
+.back:hover {
+  color: #fff;
+}
+
+/* 紫色卡片板块 */
+.card {
+  background: #231642;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 0 22px rgba(130, 80, 255, 0.15);
+}
+
+.card h2 {
+  font-size: 20px;
+  color: #d4bcff;
+  margin-bottom: 14px;
+  padding-left: 8px;
+  border-left: 4px solid #9f7fff;
+}
+
+.card p {
+  color: #e2d9ff;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <a href="index.html" class="back">← 返回首页</a>
+
+  <header>
+    <h1>期末项目：STM32 智能桌面宠物</h1>
+  </header>
+
+  <div class="card">
+    <h2>一、项目简介与核心介绍</h2>
+    <p>本项目设计并实现了一款基于 STM32F103C8T6 嵌入式单片机的多功能智能桌面宠物互动系统。项目深度融合嵌入式开发、串口通信、智能语音识别、机电一体化控制与无线蓝牙传输技术，以小型仿生四足机械结构为物理载体，搭配多自由度舵机驱动、OLED 可视化显示、智能语音交互、蓝牙无线通信以及独立锂电池供电系统，构建出一套集感知、解析、决策、执行、反馈于一体的完整嵌入式智能交互系统。</p>
+    <p>本系统彻底摆脱传统桌面摆件单一装饰、无交互、无智能属性的局限，打造出一款兼具趣味性、实用性与创新性的桌面智能陪伴设备。</p>
+  </div>
+
+  <div class="card">
+    <h2>1. 智能语音识别交互功能</h2>
+    <p>项目搭载 SU-03T1 智能离线语音模块，支持自定义唤醒词与多功能指令词配置，无需联网即可实现本地离线精准识别。用户可通过语音下发立正、前进、后退、左转、右转、摇尾巴、趴下、蹲下、睡觉、打招呼、伸懒腰等十余种指令，语音响应灵敏、识别准确率高，实现自然无接触的人机交互体验。</p>
+  </div>
+
+  <div class="card">
+    <h2>2. 蓝牙无线远程控制功能</h2>
+    <p>系统搭载 HC-05 蓝牙通信模块，基于串口协议与单片机进行数据交互，支持手机蓝牙配对连接。用户可通过手机端控制界面远程下发指令，实现无线、远距离、灵活化的宠物动作控制，丰富交互方式与使用场景。</p>
+  </div>
+
+  <div class="card">
+    <h2>3. OLED 动态表情与状态显示</h2>
+    <p>设备搭载 1.3 寸 I2C 协议 OLED 显示屏，可实现自定义动态表情切换与设备状态实时显示。在待机、唤醒、执行指令、休眠等模式下，屏幕会同步切换对应表情与提示信息，直观反馈当前运行状态，提升智能化与趣味性。</p>
+  </div>
+
+  <div class="card">
+    <h2>4. 多舵机仿生姿态运动功能</h2>
+    <p>系统使用 5 路 SG90 高精度舵机控制四肢与尾部动作，通过单片机输出精准 PWM 信号控制角度与速度，模拟真实生物的流畅仿生动作。动作稳定、姿态自然，极大提升宠物的灵动性与互动质感。</p>
+  </div>
+
+  <div class="card">
+    <h2>5. 独立锂电池充放电功能</h2>
+    <p>项目配备 3.7V 锂电池与 5V 充放电一体化模块，具备充电保护、稳压输出功能。设备可脱离电脑与外接电源独立运行，摆脱线材限制，实现随时随地使用，大幅提升便携性与实用性。</p>
+  </div>
+
+  <div class="card">
+    <h2>6. 氛围灯光提示功能</h2>
+    <p>设备板载 LED 呼吸指示灯，可根据不同工作状态呈现差异化灯光效果，在待机、工作、指令响应时自动变化，营造科技氛围感，同时直观反馈设备运行状态，兼具美观与实用价值。</p>
+  </div>
+
+</div>
+</body>
+</html>
