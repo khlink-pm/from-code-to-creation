@@ -1,0 +1,159 @@
+!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发现问题与处理方法</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "微软雅黑", sans-serif;
+            min-height: 100vh;
+            background: #f0e8ff;
+            background-image: radial-gradient(circle at 20% 30%, #e8d9ff 0%, transparent 40%),
+                              radial-gradient(circle at 80% 70%, #e2d0ff 0%, transparent 40%);
+            position: relative;
+            overflow-x: hidden;
+            color: #333;
+            line-height: 1.8;
+        }
+
+        /* 移动星球特效 */
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(200, 180, 255, 0.3);
+            animation: move 25s linear infinite;
+            z-index: 0;
+        }
+
+        .planet:nth-child(1) {
+            width: 120px;
+            height: 120px;
+            top: 10%;
+            left: -60px;
+            animation-duration: 28s;
+        }
+
+        .planet:nth-child(2) {
+            width: 90px;
+            height: 90px;
+            top: 40%;
+            left: -45px;
+            animation-duration: 35s;
+        }
+
+        .planet:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            bottom: 15%;
+            left: -75px;
+            animation-duration: 40s;
+        }
+
+        @keyframes move {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(100vw + 100px)); }
+        }
+
+        .container {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 60px 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title {
+            font-size: 26px;
+            color: #5a3d9e;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .item {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px 24px;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            box-shadow: 0 6px 20px rgba(150, 120, 200, 0.12);
+        }
+
+        .item h3 {
+            color: #6d4bc5;
+            margin-bottom: 8px;
+            font-size: 17px;
+        }
+
+        .item p {
+            font-size: 15px;
+            color: #333;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 30px;
+            color: #6d4bc5;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .back:hover {
+            color: #8c68e6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="planet"></div>
+    <div class="planet"></div>
+    <div class="planet"></div>
+
+    <div class="container">
+        <h2 class="title">发现问题与处理方法</h2>
+
+        <div class="item">
+            <h3>1. 电源模块灯异常</h3>
+            <p>现象：一个绿灯闪或蓝绿交替闪是正常的。若装上完全不亮，大概率是板没焊好、有短路或正极接地。</p>
+            <p>处理：检查主板，或将电源模块拆下来单独测试是否为模块本身问题。</p>
+        </div>
+
+        <div class="item">
+            <h3>2. 语音代码写不进</h3>
+            <p>处理方法一：把340下载器上的RS和TX换一下顺序，重启电脑测试。</p>
+            <p>处理方法二：语音代码存放D盘或E盘总目录下，不要放在任何文件夹内。</p>
+            <p>处理方法三：更换杜邦线。</p>
+        </div>
+
+        <div class="item">
+            <h3>3. 屏不亮、无显示</h3>
+            <p>处理：换4条线重新插紧，大概率是接触不良，有条件直接焊在屏上。</p>
+            <p>仔细核对主板标记与显示屏标记是否一致。若单片机角上4个灯不亮，证明单片机未工作，检查排线座附近4个电容是否焊好。</p>
+        </div>
+
+        <div class="item">
+            <h3>4. 单片机写代码提示超时</h3>
+            <p>处理：把340下载器的TX和RX换一下顺序；单片机重新插拔，插紧插到底；如不行则更换杜邦线。</p>
+        </div>
+
+        <div class="item">
+            <h3>5. 语音模块能收回复但不执行动作</h3>
+            <p>软件：去网盘下载对应的语音代码，如V1.2写成V1.1会出现此现象。</p>
+            <p>硬件：检查2个100欧电阻是否焊好、焊牢固；检查语音模块座子与单片机座子是否虚焊导致数据传输失败。</p>
+        </div>
+
+        <div class="item">
+            <h3>6. 舵机不动作</h3>
+            <p>处理：检查线序是否插反，黄色信号线必须朝向单片机方向。</p>
+        </div>
+
+        <a href="index.html" class="back">← 返回项目首页</a>
+    </div>
+</body>
+</html>
