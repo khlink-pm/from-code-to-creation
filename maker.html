@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创客项目日志</title>
+    <!-- 引入 Tailwind CSS 进行快速页面构建和美化 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome 图标库以增强 UI 视觉体验 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            /* 设置渐变背景，使页面看起来更现代和有活力 */
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            min-height: 100vh;
+        }
+
+        /* 自定义滚动条样式，使其更精美 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* 简单的淡入动画类 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 隐藏元素的辅助类 */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        
+        <!-- 页面头部区域 -->
+        <header class="bg-white rounded-2xl shadow-sm p-6 mb-8 border border-gray-100 flex flex-col md:flex-row items-center justify-between">
+            <div class="flex items-center gap-4 mb-4 md:mb-0">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+                    <i class="fa-solid fa-lightbulb"></i>
+                </div>
+                <div>
+                    <!-- 项目名称，点击可编辑 (此处简化为静态显示，后续可增加编辑功能) -->
+                    <h1 class="text-2xl font-bold text-gray-900" id="project-title">我的创客</h1>
+                    <p class="text-sm text-gray-500">我的创客项目进展记录</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <!-- 导出日志按钮 -->
+                <button onclick="exportLogs()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> 导出数据
+                </button>
+                <!-- 唤起添加日志弹窗的按钮 -->
+                <button onclick="openModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> 新建记录
+                </button>
+            </div>
+        </header>
+
+        <!-- 项目状态概览卡片组 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- 卡片1: 开始日期 -->
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-start gap-4">
+                <div class="text-green-500 bg-green-50 p-2 rounded-lg mt-1">
+                    <i class="fa-regular fa-calendar-check fa-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">项目启动</h3>
+                    <p class="text-lg font-medium text-gray-800">2026-3-20</p>
+                </div>
+            </div>
+            <!-- 卡片2: 记录总数 -->
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-start gap-4">
+                <div class="text-purple-500 bg-purple-50 p-2 rounded-lg mt-1">
+                    <i class="fa-solid fa-layer-group fa-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">日志条目</h3>
+                    <p class="text-lg font-medium text-gray-800" id="log-count">0 篇</p>
+                </div>
+            </div>
+            <!-- 卡片3: 当前阶段 -->
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-start gap-4">
+                <div class="text-orange-500 bg-orange-50 p-2 rounded-lg mt-1">
+                    <i class="fa-solid fa-bars-progress fa-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">当前阶段</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="relative flex h-3 w-3">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                        </span>
+                        <p class="text-lg font-medium text-gray-800">原型开发</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日志时间轴主要容器 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-timeline text-blue-500"></i> 开发历程
+            </h2>
+            
+            <!-- 时间轴内容容器，由 JS 动态填充 -->
+            <div id="timeline-container" class="relative border-l-2 border-gray-200 ml-3 md:ml-4 space-y-8 pb-4">
+                <!-- 日志项将在这里生成 -->
+                <div id="empty-state" class="text-center py-10 text-gray-500">
+                    <i class="fa-regular fa-folder-open text-4xl mb-3 text-gray-300"></i>
+                    <p>还没有记录任何日志，点击右上角"新建记录"开始吧！</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 添加日志的模态弹窗 (默认隐藏) -->
+    <div id="add-modal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden transform scale-95 transition-transform duration-300" id="modal-content">
+            
+            <!-- 弹窗头部 -->
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="text-lg font-semibold text-gray-800"><i class="fa-solid fa-pen-nib text-blue-500 mr-2"></i>记录新进展</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- 弹窗表单内容 -->
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">记录日期</label>
+                    <input type="date" id="log-date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">标签分类</label>
+                    <select id="log-tag" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                        <option value="idea">?? 灵感/想法</option>
+                        <option value="hardware">?? 硬件组装</option>
+                        <option value="code">?? 代码编写</option>
+                        <option value="test">?? 测试与调试</option>
+                        <option value="milestone">?? 里程碑</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">内容详情</label>
+                    <textarea id="log-content" rows="4" placeholder="今天完成了什么？遇到了什么问题？..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow resize-y"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">图片 URL (可选)</label>
+                    <input type="text" id="log-image" placeholder="https://example.com/image.jpg" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow">
+                    <p class="text-xs text-gray-500 mt-1">支持插入一张网络图片链接。</p>
+                </div>
+            </div>
+            
+            <!-- 弹窗底部操作区 -->
+            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors">取消</button>
+                <button onclick="saveLog()" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-check"></i> 保存记录
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 应用程序状态管理
+        let logs = [];
+        const STORAGE_KEY = 'maker_project_logs';
+
+        // 标签对应的颜色和图标配置，用于美化 UI
+        const tagStyles = {
+            'idea': { color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: 'fa-lightbulb' },
+            'hardware': { color: 'bg-gray-100 text-gray-700 border-gray-200', icon: 'fa-microchip' },
+            'code': { color: 'bg-blue-100 text-blue-700 border-blue-200', icon: 'fa-code' },
+            'test': { color: 'bg-red-100 text-red-700 border-red-200', icon: 'fa-bug' },
+            'milestone': { color: 'bg-purple-100 text-purple-700 border-purple-200', icon: 'fa-flag-checkered' }
+        };
+
+        const tagLabels = {
+            'idea': '灵感', 'hardware': '硬件', 'code': '代码', 'test': '测试', 'milestone': '里程碑'
+        };
+
+        // 初始化页面：从本地存储加载数据并渲染
+        document.addEventListener('DOMContentLoaded', () => {
+            // 设置默认日期为今天
+            document.getElementById('log-date').valueAsDate = new Date();
+            loadLogs();
+        });
+
+        // 从 LocalStorage 加载数据
+        function loadLogs() {
+            const storedLogs = localStorage.getItem(STORAGE_KEY);
+            if (storedLogs) {
+                try {
+                    logs = JSON.parse(storedLogs);
+                    // 按日期降序排序（最新的在最前面）
+                    logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                } catch (e) {
+                    console.error("解析日志数据失败", e);
+                    logs = [];
+                }
+            } else {
+                // 如果没有数据，提供一些示例数据
+                logs = [
+                    {
+                        id: Date.now() - 100000,
+                        date: new Date().toISOString().split('T')[0],
+                        tag: 'idea',
+                        content: '构思了"智能温室控制系统"的初步架构。决定采用 ESP32 作为主控，搭配 DHT11 温湿度传感器和光敏电阻。',
+                        imageUrl: ''
+                    }
+                ];
+                saveToStorage();
+            }
+            renderLogs();
+        }
+
+        // 保存数据到 LocalStorage
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+        }
+
+        // 渲染日志列表到 DOM
+        function renderLogs() {
+            const container = document.getElementById('timeline-container');
+            const emptyState = document.getElementById('empty-state');
+            const countDisplay = document.getElementById('log-count');
+            
+            // 更新日志数量统计
+            countDisplay.innerText = `${logs.length} 篇`;
+
+            // 清空除 empty-state 外的内容
+            const items = container.querySelectorAll('.timeline-item');
+            items.forEach(item => item.remove());
+
+            if (logs.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            // 生成并插入 HTML
+            logs.forEach(log => {
+                const style = tagStyles[log.tag] || tagStyles['idea'];
+                const label = tagLabels[log.tag] || '未知';
+                
+                // 格式化日期显示
+                const dateObj = new Date(log.date);
+                const formattedDate = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
+
+                const logElement = document.createElement('div');
+                logElement.className = 'timeline-item relative pl-8 sm:pl-10 fade-in group';
+                
+                // 构建单个日志条目的 HTML 结构
+                logElement.innerHTML = `
+                    <!-- 时间轴圆点 -->
+                    <div class="absolute w-4 h-4 bg-white border-2 border-blue-500 rounded-full -left-[9px] top-1 shadow-sm group-hover:bg-blue-100 transition-colors"></div>
+                    
+                    <div class="bg-gray-50 border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow">
+                        <div class="flex flex-wrap items-center justify-between mb-3 gap-2">
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-semibold text-gray-500"><i class="fa-regular fa-calendar mr-1"></i> ${formattedDate}</span>
+                                <span class="px-2.5 py-1 rounded-md text-xs font-medium border ${style.color}">
+                                    <i class="fa-solid ${style.icon} mr-1"></i> ${label}
+                                </span>
+                            </div>
+                            <!-- 删除按钮 -->
+                            <button onclick="deleteLog(${log.id})" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="删除记录">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="text-gray-700 leading-relaxed whitespace-pre-wrap">${escapeHTML(log.content)}</div>
+                        
+                        ${log.imageUrl ? `
+                        <div class="mt-4 rounded-lg overflow-hidden border border-gray-200">
+                            <img src="${escapeHTML(log.imageUrl)}" alt="项目图片" class="w-full max-h-96 object-cover hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/eeeeee/999999?text=Image+Load+Failed';">
+                        </div>` : ''}
+                    </div>
+                `;
+                container.appendChild(logElement);
+            });
+        }
+
+        // 打开添加弹窗
+        function openModal() {
+            const modal = document.getElementById('add-modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            modal.classList.remove('hidden');
+            // 触发重绘以应用过渡效果
+            void modal.offsetWidth; 
+            
+            modal.classList.remove('opacity-0');
+            modalContent.classList.remove('scale-95');
+        }
+
+        // 关闭添加弹窗
+        function closeModal() {
+            const modal = document.getElementById('add-modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            
+            // 等待动画结束后隐藏
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                // 清空表单数据
+                document.getElementById('log-content').value = '';
+                document.getElementById('log-image').value = '';
+                document.getElementById('log-date').valueAsDate = new Date();
+            }, 300);
+        }
+
+        // 保存新日志
+        function saveLog() {
+            const dateInput = document.getElementById('log-date').value;
+            const tagInput = document.getElementById('log-tag').value;
+            const contentInput = document.getElementById('log-content').value;
+            const imageInput = document.getElementById('log-image').value;
+
+            if (!contentInput.trim()) {
+                showMessage("内容不能为空！", "error");
+                return;
+            }
+
+            const newLog = {
+                id: Date.now(), // 使用时间戳作为简单唯一ID
+                date: dateInput,
+                tag: tagInput,
+                content: contentInput,
+                imageUrl: imageInput
+            };
+
+            logs.push(newLog);
+            // 重新排序并保存
+            logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+            saveToStorage();
+            
+            closeModal();
+            renderLogs();
+            showMessage("记录已保存！", "success");
+        }
+
+        // 删除日志
+        function deleteLog(id) {
+            // 自定义提示框代替原生 confirm (要求)
+            if(window.confirmBoxOpen) return; // 简易防抖
+            window.confirmBoxOpen = true;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center';
+            overlay.innerHTML = `
+                <div class="bg-white rounded-xl shadow-xl p-6 w-80 text-center animate-[fadeIn_0.2s_ease-out]">
+                    <div class="text-red-500 text-4xl mb-3"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">确认删除？</h3>
+                    <p class="text-gray-500 text-sm mb-6">此操作将从记录中永久移除该条目，无法恢复。</p>
+                    <div class="flex justify-center gap-3">
+                        <button id="cancel-del" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">取消</button>
+                        <button id="confirm-del" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">删除</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            document.getElementById('cancel-del').onclick = () => {
+                document.body.removeChild(overlay);
+                window.confirmBoxOpen = false;
+            };
+
+            document.getElementById('confirm-del').onclick = () => {
+                logs = logs.filter(log => log.id !== id);
+                saveToStorage();
+                renderLogs();
+                document.body.removeChild(overlay);
+                window.confirmBoxOpen = false;
+                showMessage("记录已删除", "success");
+            };
+        }
+
+        // 导出日志数据为 JSON 文件
+        function exportLogs() {
+            if (logs.length === 0) {
+                showMessage("没有数据可导出", "error");
+                return;
+            }
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "maker_project_logs.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // 显示底部提示消息 (代替 alert)
+        function showMessage(text, type = 'success') {
+            const msgBox = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-gray-800' : 'bg-red-600';
+            const icon = type === 'success' ? 'fa-circle-check text-green-400' : 'fa-circle-exclamation text-white';
+            
+            msgBox.className = `fixed bottom-5 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50 fade-in transition-all duration-300`;
+            msgBox.innerHTML = `<i class="fa-solid ${icon}"></i> <span class="font-medium text-sm">${text}</span>`;
+            
+            document.body.appendChild(msgBox);
+            
+            // 3秒后淡出并移除
+            setTimeout(() => {
+                msgBox.style.opacity = '0';
+                msgBox.style.transform = 'translate(-50%, 10px)';
+                setTimeout(() => document.body.removeChild(msgBox), 300);
+            }, 3000);
+        }
+
+        // 防止 XSS 攻击的简单 HTML 转义函数
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag])
+            );
+        }
+    </script>
+</body>
+</html>
