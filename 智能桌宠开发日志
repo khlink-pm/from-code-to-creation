@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能小桌宠开发日志</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #2c3e50; }
+        textarea { width: 100%; height: 400px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; resize: vertical; }
+        .controls { margin-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .save-btn { background-color: #27ae60; color: white; }
+        #status { font-size: 0.9em; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🤖 智能小桌宠项目文档</h1>
+    
+    <textarea id="logArea"># 智能小桌宠开发档案
+
+## 1. 项目简介
+本项目是一款基于 STM32 单片机的智能小桌宠，支持语音与蓝牙双模式控制，旨在桌面环境下提供趣味交互。
+
+## 2. 学习来源
+- 单片机小狗灵感：【有出息的男孩】
+- STM32 与 OLED 开发：【江协科技】
+- 嘉立创 PCB 设计：【Expert电子实验室】
+- SOLIDWORKS 建模：【阿奇设计分享】
+- 语音交互逻辑：【机芯智能】SU-03T1/CI-03T 模块
+
+## 3. 功能概览
+支持多种交互动作：立正、前进、后退、左转、右转、摇尾巴、趴下、蹲下、睡觉、跳跃、打招呼、伸懒腰等。
+
+## 4. 硬件原理解析
+本项目采用串口控制逻辑，核心组成部分如下：
+- 电源管理系统
+- 舵机驱动阵列
+- OLED 显示模块
+- 蓝牙通信模块
+- 语音识别模块（基于 SU-03T1，支持自定义唤醒词与命令词）
+
+逻辑处理流程：麦克风接收语音信号 -> 提取特征 -> 解析比对 -> 触发动作指令。
+
+## 5. 开发日志
+[2026-05-30] 项目初始化，整理硬件参数。
+- 控制函数示例：$Position(\theta) = \frac{PWM}{Period} \times 180^\circ$
+</textarea>
+
+    <div class="controls">
+        <span id="status"></span>
+        <button class="save-btn" onclick="saveLog()">保存日志</button>
+    </div>
+</div>
+
+<script>
+    const logArea = document.getElementById('logArea');
+    const status = document.getElementById('status');
+
+    window.onload = () => {
+        const savedLog = localStorage.getItem('petProjectLog');
+        if (savedLog) logArea.value = savedLog;
+    };
+
+    function saveLog() {
+        localStorage.setItem('petProjectLog', logArea.value);
+        status.innerText = "日志已保存于本地！";
+        setTimeout(() => status.innerText = "", 2000);
+    }
+</script>
+</body>
+</html>
