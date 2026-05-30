@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>项目制作六大步骤 | STM32智能桌面宠物</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Microsoft YaHei", sans-serif;
+  background: #100720;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(128, 90, 255, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(180, 120, 255, 0.15) 0%, transparent 40%);
+  min-height: 100vh;
+  color: white;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* 流星动画 */
+.meteor {
+  position: absolute;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(180,140,255,1));
+  top: 0;
+  left: 80%;
+  opacity: 0;
+  animation: meteor 4s linear infinite;
+  z-index: 1;
+}
+
+@keyframes meteor {
+  0% { transform: translateY(-100px) rotate(20deg); opacity: 1; }
+  100% { transform: translateY(1000px) rotate(20deg); opacity: 0; }
+}
+
+.meteor:nth-child(2) { left: 20%; animation-delay: 1s; }
+.meteor:nth-child(3) { left: 50%; animation-delay: 2.5s; }
+.meteor:nth-child(4) { left: 70%; animation-delay: 1.8s; }
+
+/* 标题 */
+header {
+  text-align: center;
+  padding: 60px 20px 40px;
+  position: relative;
+  z-index: 2;
+}
+
+h1 {
+  font-size: 34px;
+  color: #e1d9ff;
+  margin-bottom: 10px;
+}
+
+.sub {
+  color: #bbaaff;
+  font-size: 18px;
+}
+
+/* 返回 */
+.back {
+  position: relative;
+  z-index: 2;
+  color: #bbaaff;
+  text-decoration: none;
+  font-size: 16px;
+  margin-left: 20px;
+}
+
+.back:hover {
+  color: #fff;
+}
+
+/* 五角星布局 */
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 40px;
+  padding: 20px 40px 80px;
+  position: relative;
+  z-index: 2;
+}
+
+/* 五角星样式 */
+.star {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+/* 五角星形状 */
+.star::before {
+  content: '';
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  background: #7b2ffc;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  box-shadow: 0 0 30px rgba(120,80,255,0.6);
+  z-index: -1;
+}
+
+.star:hover {
+  transform: scale(1.1);
+}
+.star:hover::before {
+  box-shadow: 0 0 50px rgba(160,120,255,1);
+}
+
+/* 六色五角星 */
+.p1::before { background: #7b2ffc; }
+.p2::before { background: #5c33ff; }
+.p3::before { background: #425cff; }
+.p4::before { background: #8c2eff; }
+.p5::before { background: #b266ff; }
+.p6::before { background: #5e35b1; }
+</style>
+</head>
+
+<body>
+
+<!-- 流星 -->
+<div class="meteor"></div>
+<div class="meteor"></div>
+<div class="meteor"></div>
+<div class="meteor"></div>
+
+<a href="index.html" class="back">← 返回项目首页</a>
+
+<header>
+  <h1>项目制作六大步骤</h1>
+  <p class="sub">STM32 智能桌面宠物 | 完整制作流程</p>
+</header>
+
+<div class="container">
+  <a class="star p1" href="step1/step1.html">步骤 1<br>3D打印</a>
+  <a class="star p2" href="step2/step2.html">步骤 2<br>PCB设计 </a>
+  <a class="star p3" href="step3/step3.html">步骤 3<br>元器件焊接</a>
+  <a class="star p4" href="step4/step4.html">步骤 4<br>硬件组装</a>
+  <a class="star p5" href="step5/step5.html">步骤 5<br>程序烧录</a>
+  <a class="star p6" href="step6/step6.html">步骤 6<br>整体调试</a>
+</div>
+
+</body>
+</html>
