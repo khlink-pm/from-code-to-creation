@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创客手记 | Maker Space</title>
+    <!-- Tailwind CSS for layout structure -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for elegant typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- MathJax for rendering gorgeous math equations -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --color-bg: #E6ECEF;        /* 莫兰迪温润浅灰蓝 */
+            --color-card-bg: #D5DFE2;   /* 莫兰迪中灰蓝 */
+            --color-text-main: #3A4348; /* 柔和深灰蓝 */
+            --color-text-sub: #727E85;  /* 优雅雾蓝灰 */
+            --color-morandi-blue: #5B7280; /* 经典莫兰迪灰蓝 */
+            --color-morandi-warm: #BFA5A0; /* 温暖陶土粉 */
+            --color-border: #C6D1D5;    /* 细腻的灰蓝分界线 */
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Serif SC', serif;
+            background-color: var(--color-bg);
+            color: var(--color-text-main);
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        .glass-nav {
+            background-color: rgba(230, 236, 239, 0.85);
+            backdrop-filter: blur(12px);
+        }
+
+        .maker-card {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid var(--color-border);
+            height: 18rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2rem;
+            border-radius: 1.5rem;
+        }
+
+        /* 正常状态交互 */
+        body:not(.editing-mode) .maker-card:hover {
+            box-shadow: 0 20px 45px -20px rgba(91, 114, 128, 0.2);
+            transform: translateY(-5px);
+            background-color: #EDF2F4; 
+            border-color: var(--color-morandi-blue);
+        }
+
+        /* 编辑状态交互 */
+        body.editing-mode .maker-card {
+            cursor: text;
+            transform: none !important;
+        }
+
+        [contenteditable="true"] {
+            outline: 1px dashed var(--color-morandi-warm);
+            padding: 2px 4px;
+            border-radius: 4px;
+            background-color: rgba(191, 165, 160, 0.05);
+        }
+
+        .page-section {
+            transition: all 0.4s ease;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--color-text-sub);
+            margin-bottom: 2rem;
+            transition: color 0.3s;
+        }
+        .back-btn:hover { color: var(--color-morandi-blue); }
+
+        /* 统一的灰蓝色极简滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--color-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-morandi-blue);
+        }
+
+        /* 温暖风格的弹窗阴影 */
+        .modal-shadow {
+            box-shadow: 0 25px 50px -12px rgba(91, 114, 128, 0.25);
+        }
+    </style>
+</head>
+<body class="min-h-screen antialiased flex flex-col justify-between">
+
+    <!-- 顶部导航 -->
+    <header class="fixed top-0 left-0 w-full z-40 border-b border-[var(--color-border)] glass-nav">
+        <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div onclick="showPage('home')" class="flex items-center space-x-3 cursor-pointer group">
+                <svg class="w-8 h-8 text-[var(--color-morandi-blue)] transition-transform duration-500 group-hover:rotate-45" viewBox="0 0 100 100" fill="none">
+                    <path d="M50 15C30.67 15 15 30.67 15 50C15 69.33 30.67 85 50 85C69.33 85 85 69.33 85 50" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                    <circle cx="50" cy="50" r="12" fill="var(--color-morandi-warm)" />
+                </svg>
+                <span class="font-semibold text-lg tracking-wider">创客手记</span>
+            </div>
+
+            <button onclick="toggleEditMode()" id="editBtn" class="flex items-center space-x-2 px-5 py-2 rounded-full border border-[var(--color-border)] text-sm font-medium transition-all duration-300 hover:bg-[var(--color-card-bg)]">
+                <span class="w-2 h-2 rounded-full bg-gray-400" id="editDot"></span>
+                <span id="editText">开启编辑模式</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="pt-32 pb-20 max-w-6xl mx-auto px-6 w-full flex-grow">
+        
+        <!-- HOME 页面 -->
+        <section id="page-home" class="page-section">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h1 class="text-3xl md:text-4xl font-light mb-4 text-[var(--color-text-main)]" data-key="h-title" contenteditable="false">用双手，赋予思想以实体</h1>
+                <p class="text-[var(--color-text-sub)] font-light" data-key="h-sub" contenteditable="false">点击下方板块进入详情，开启编辑模式即可自由修改所有文字与图片。</p>
+            </div>
+
+            <!-- 八大黄金网格板块 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+                <!-- 模块 1 -->
+                <div onclick="showPage('maker')" class="maker-card lg:col-span-4 bg-[var(--color-card-bg)]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm opacity-50 font-mono">01</span>
+                        <span class="text-[10px] tracking-widest uppercase opacity-60">Concept</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-medium mb-2" data-key="c1-t" contenteditable="false">什么是创客</h3>
+                        <p class="text-xs text-[var(--color-text-sub)] leading-relaxed" data-key="c1-d" contenteditable="false">探讨造物者的核心哲学，从想法到实践的第一步。</p>
+                    </div>
+                </div>
+
+                <!-- 模块 2 -->
+                <div onclick="showPage('pcb')" class="maker-card lg:col-span-4 bg-[var(--color-card-bg)]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm opacity-50 font-mono">02</span>
+                        <span class="text-[10px] tracking-widest uppercase opacity-60">Hardware</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-medium mb-2" data-key="c2-t" contenteditable="false">PCB设计</h3>
+                        <p class="text-xs text-[var(--color-text-sub)] leading-relaxed" data-key="c2-d" contenteditable="false">电流的秩序美学，将逻辑转化为物理连线。</p>
+                    </div>
+                </div>
+
+                <!-- 模块 3 -->
+                <div onclick="showPage('print')" class="maker-card lg:col-span-4 bg-[var(--color-card-bg)]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm opacity-50 font-mono">03</span>
+                        <span class="text-[10px] tracking-widest uppercase opacity-60">Craft</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-medium mb-2" data-key="c3-t" contenteditable="false">3D打印</h3>
+                        <p class="text-xs text-[var(--color-text-sub)] leading-relaxed" data-key="c3-d" contenteditable="false">堆叠成型的快乐，让虚拟模型在现实具象化。</p>
+                    </div>
+                </div>
+
+                <!-- 模块 4 -->
+                <div onclick="showPage('sw')" class="maker-card lg:col-span-6 bg-[var(--color-card-bg)]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm opacity-50 font-mono">04</span>
+                        <span class="text-[10px] tracking-widest uppercase opacity-60">Modeling</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-medium mb-2" data-key="c4-t" contenteditable="false">SolidWorks</h3>
+                        <p class="text-xs text-[var(--color-text-sub)] leading-relaxed" data-key="c4-d" contenteditable="false">工业世界的骨架，用参数定义复杂的几何之美。</p>
+                    </div>
+                </div>
+
+                <!-- 模块 5 -->
+                <div onclick="showPage('embedded')" class="maker-card lg:col-span-6 bg-[var(--color-card-bg)]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm opacity-50 font-mono">05</span>
+                        <span class="text-[10px] tracking-widest uppercase opacity-60">Computing</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-medium mb-2" data-key="c5-t" contenteditable="false">嵌入式计算</h3>
+                        <p class="text-xs text-[var(--color-text-sub)] leading-relaxed" data-key="c5-d" contenteditable="false">数字灵魂的脉动，赋予芯片感知与控制的能力。</p>
+                    </div>
+                </div>
+
+                <!-- 预留模块 6 -->
+                <div onclick="showPage('r1')" class="maker-card lg:col-span-4 bg-[var(--color-card-bg)]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm opacity-50 font-mono">06</span>
+                        <span class="text-[10px] tracking-widest uppercase opacity-60">Reserve</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-medium mb-2" data-key="c6-t" contenteditable="false">交互美学</h3>
+                        <p class="text-xs text-[var(--color-text-sub)] leading-relaxed" data-key="c6-d" contenteditable="false">探寻人机最舒适自然的过渡，将极简设计融入点滴反馈。</p>
+                    </div>
+                </div>
+
+                <!-- 预留模块 7 -->
+                <div onclick="showPage('r2')" class="maker-card lg:col-span-4 bg-[var(--color-card-bg)]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm opacity-50 font-mono">07</span>
+                        <span class="text-[10px] tracking-widest uppercase opacity-60">Reserve</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-medium mb-2" data-key="c7-t" contenteditable="false">材料工艺</h3>
+                        <p class="text-xs text-[var(--color-text-sub)] leading-relaxed" data-key="c7-d" contenteditable="false">触摸木纹、黄铜与粗陶的质地，包裹数字内核的灵动。</p>
+                    </div>
+                </div>
+
+                <!-- 预留模块 8 -->
+                <div onclick="showPage('r3')" class="maker-card lg:col-span-4 bg-[var(--color-card-bg)]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm opacity-50 font-mono">08</span>
+                        <span class="text-[10px] tracking-widest uppercase opacity-60">Reserve</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-medium mb-2" data-key="c8-t" contenteditable="false">灵感存档</h3>
+                        <p class="text-xs text-[var(--color-text-sub)] leading-relaxed" data-key="c8-d" contenteditable="false">日常闪光的草图与碎碎念，也许就是明天的伟大造物。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详情页：什么是创客 -->
+        <section id="page-maker" class="page-section hidden opacity-0 translate-y-8 max-w-3xl mx-auto">
+            <a href="javascript:void(0)" onclick="showPage('home')" class="back-btn">← 返回主页</a>
+            
+            <!-- 带有更换功能的 Banner 图像块 -->
+            <div class="relative w-full h-80 rounded-3xl overflow-hidden mb-8 group warm-shadow border border-[var(--color-border)]">
+                <img id="img-maker-banner" src="https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=1200&q=80" alt="什么是创客" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none edit-overlay">
+                    <button onclick="triggerImagePicker('img-maker-banner')" class="pointer-events-auto px-5 py-2.5 rounded-full bg-white/90 backdrop-blur-md text-sm font-medium text-[var(--color-text-main)] shadow-lg hover:bg-white transition-all flex items-center gap-2">
+                        📷 更换主图
+                    </button>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-light mb-8" data-key="p1-title" contenteditable="false">什么是创客</h2>
+            <div class="prose max-w-none text-[var(--color-text-main)] font-light leading-relaxed space-y-6">
+                <p data-key="p1-p1" contenteditable="false">“创客”一词源自英文 “Maker”，代表着不满足于仅仅作为消费者的个体，他们是造物者，更是在物质世界里浪漫地表达自我的人。一件手作木雕、一套手工皮具、亦或是一个极简的小收纳工具，都是创客内心的缩影。</p>
+                <div class="p-6 bg-[var(--color-card-bg)] rounded-2xl text-center">$$V = \int_{0}^{T} f(Idea, Effort) dt$$</div>
+                <p data-key="p1-p2" contenteditable="false">（开启编辑模式后，双击文字即可修改这段描述。您还可以使用最下方的区域自由添加属于您的项目照片和插图手记）</p>
+            </div>
+
+            <!-- 动态插图附件画廊 -->
+            <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
+                <h4 class="text-lg font-medium mb-6 text-[var(--color-text-main)]">手记插图集</h4>
+                <div id="gallery-maker" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+                <div class="mt-6 edit-overlay hidden">
+                    <button onclick="addNewGalleryItem('maker')" class="w-full py-4 rounded-2xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-morandi-blue)] text-sm text-[var(--color-text-sub)] hover:text-[var(--color-text-main)] transition-all flex items-center justify-center gap-2">
+                        ➕ 添加新插图至本篇
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详情页：PCB设计 -->
+        <section id="page-pcb" class="page-section hidden opacity-0 translate-y-8 max-w-3xl mx-auto">
+            <a href="javascript:void(0)" onclick="showPage('home')" class="back-btn">← 返回主页</a>
+            
+            <div class="relative w-full h-80 rounded-3xl overflow-hidden mb-8 group warm-shadow border border-[var(--color-border)]">
+                <img id="img-pcb-banner" src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80" alt="PCB设计" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none edit-overlay">
+                    <button onclick="triggerImagePicker('img-pcb-banner')" class="pointer-events-auto px-5 py-2.5 rounded-full bg-white/90 backdrop-blur-md text-sm font-medium text-[var(--color-text-main)] shadow-lg hover:bg-white transition-all flex items-center gap-2">
+                        📷 更换主图
+                    </button>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-light mb-8" data-key="p2-title" contenteditable="false">PCB设计</h2>
+            <div class="prose max-w-none text-[var(--color-text-main)] font-light leading-relaxed space-y-6">
+                <p data-key="p2-p1" contenteditable="false">PCB不仅是电路的载体，更是艺术的延伸。合理的布局与走线不仅关乎功能，更关乎美感。一根根导线在设计师笔下流转，搭建起电流在物理世界行走的微型城市。</p>
+                <div class="p-6 bg-[var(--color-card-bg)] rounded-2xl text-center">$$Z_0 \approx \frac{87}{\sqrt{\epsilon_r + 1.41}} \ln\left(\frac{5.98h}{0.8w + t}\right)$$</div>
+                <p data-key="p2-p2" contenteditable="false">在极简造物的过程中，PCB的机械边界、器件选型与美学走线往往处于精妙的动态平衡中。每一个弯角的度数，都流淌着理性的克制与浪漫。</p>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
+                <h4 class="text-lg font-medium mb-6 text-[var(--color-text-main)]">手记插图集</h4>
+                <div id="gallery-pcb" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+                <div class="mt-6 edit-overlay hidden">
+                    <button onclick="addNewGalleryItem('pcb')" class="w-full py-4 rounded-2xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-morandi-blue)] text-sm text-[var(--color-text-sub)] hover:text-[var(--color-text-main)] transition-all flex items-center justify-center gap-2">
+                        ➕ 添加新插图至本篇
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详情页：3D打印 -->
+        <section id="page-print" class="page-section hidden opacity-0 translate-y-8 max-w-3xl mx-auto">
+            <a href="javascript:void(0)" onclick="showPage('home')" class="back-btn">← 返回主页</a>
+            
+            <div class="relative w-full h-80 rounded-3xl overflow-hidden mb-8 group warm-shadow border border-[var(--color-border)]">
+                <img id="img-print-banner" src="https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?auto=format&fit=crop&w=1200&q=80" alt="3D打印" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none edit-overlay">
+                    <button onclick="triggerImagePicker('img-print-banner')" class="pointer-events-auto px-5 py-2.5 rounded-full bg-white/90 backdrop-blur-md text-sm font-medium text-[var(--color-text-main)] shadow-lg hover:bg-white transition-all flex items-center gap-2">
+                        📷 更换主图
+                    </button>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-light mb-8" data-key="p3-title" contenteditable="false">3D打印</h2>
+            <div class="prose max-w-none text-[var(--color-text-main)] font-light leading-relaxed space-y-6">
+                <p data-key="p3-p1" contenteditable="false">从数字模型到物理实体的层层叠加，3D打印彻底改变了现代原型的制作流程。当喷头吐出温热的耗材细丝，空间中弥漫着纯粹的造物气息。</p>
+                <div class="p-6 bg-[var(--color-card-bg)] rounded-2xl text-center">$$T \approx \frac{V_{total}}{A \cdot v} + c_{overhead}$$</div>
+                <p data-key="p3-p2" contenteditable="false">选用哑光或具有陶土、木质触感的材料，往往能够彻底中和塑料制品的冰冷电子感，让3D打印件拥有一种朴实沉稳的高级质感。</p>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
+                <h4 class="text-lg font-medium mb-6 text-[var(--color-text-main)]">手记插图集</h4>
+                <div id="gallery-print" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+                <div class="mt-6 edit-overlay hidden">
+                    <button onclick="addNewGalleryItem('print')" class="w-full py-4 rounded-2xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-morandi-blue)] text-sm text-[var(--color-text-sub)] hover:text-[var(--color-text-main)] transition-all flex items-center justify-center gap-2">
+                        ➕ 添加新插图至本篇
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详情页：SolidWorks -->
+        <section id="page-sw" class="page-section hidden opacity-0 translate-y-8 max-w-3xl mx-auto">
+            <a href="javascript:void(0)" onclick="showPage('home')" class="back-btn">← 返回主页</a>
+            
+            <div class="relative w-full h-80 rounded-3xl overflow-hidden mb-8 group warm-shadow border border-[var(--color-border)]">
+                <img id="img-sw-banner" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80" alt="SolidWorks" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none edit-overlay">
+                    <button onclick="triggerImagePicker('img-sw-banner')" class="pointer-events-auto px-5 py-2.5 rounded-full bg-white/90 backdrop-blur-md text-sm font-medium text-[var(--color-text-main)] shadow-lg hover:bg-white transition-all flex items-center gap-2">
+                        📷 更换主图
+                    </button>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-light mb-8" data-key="p4-title" contenteditable="false">SolidWorks</h2>
+            <div class="prose max-w-none text-[var(--color-text-main)] font-light leading-relaxed space-y-6">
+                <p data-key="p4-p1" contenteditable="false">机械设计的核心。通过精确的几何建模与草图约束，我们可以模拟出复杂的机构运动。将脑海中天马行空的连杆与榫卯结构，在虚拟的无约束虚空中一点点雕琢出边界。</p>
+                <div class="p-6 bg-[var(--color-card-bg)] rounded-2xl text-center">$$\sigma = E \cdot \epsilon$$</div>
+                <p data-key="p4-p2" contenteditable="false">工业世界的严谨性在这里得到了极致体现。然而在极简设计的约束下，我们可以通过减少冗余的螺丝孔位与加强筋，让每一个结构件都透露出浑然天成的雕塑之美。</p>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
+                <h4 class="text-lg font-medium mb-6 text-[var(--color-text-main)]">手记插图集</h4>
+                <div id="gallery-sw" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+                <div class="mt-6 edit-overlay hidden">
+                    <button onclick="addNewGalleryItem('sw')" class="w-full py-4 rounded-2xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-morandi-blue)] text-sm text-[var(--color-text-sub)] hover:text-[var(--color-text-main)] transition-all flex items-center justify-center gap-2">
+                        ➕ 添加新插图至本篇
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详情页：嵌入式计算 -->
+        <section id="page-embedded" class="page-section hidden opacity-0 translate-y-8 max-w-3xl mx-auto">
+            <a href="javascript:void(0)" onclick="showPage('home')" class="back-btn">← 返回主页</a>
+            
+            <div class="relative w-full h-80 rounded-3xl overflow-hidden mb-8 group warm-shadow border border-[var(--color-border)]">
+                <img id="img-embedded-banner" src="https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&w=1200&q=80" alt="嵌入式计算" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none edit-overlay">
+                    <button onclick="triggerImagePicker('img-embedded-banner')" class="pointer-events-auto px-5 py-2.5 rounded-full bg-white/90 backdrop-blur-md text-sm font-medium text-[var(--color-text-main)] shadow-lg hover:bg-white transition-all flex items-center gap-2">
+                        📷 更换主图
+                    </button>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-light mb-8" data-key="p5-title" contenteditable="false">嵌入式计算</h2>
+            <div class="prose max-w-none text-[var(--color-text-main)] font-light leading-relaxed space-y-6">
+                <p data-key="p5-p1" contenteditable="false">控制逻辑的真正起点。写下几行质朴的代码，给无声的电子芯片注入跳跃的生命节律。它在几微秒的微光中默默监测着周遭世界的一举一动，在感知和执行的无限循环中构建数字智慧。</p>
+                <div class="p-6 bg-[var(--color-card-bg)] rounded-2xl text-center">$$y[n] = \alpha \cdot x[n] + (1 - \alpha) \cdot y[n-1]$$</div>
+                <p data-key="p5-p2" contenteditable="false">我们将纷乱多变的环境变化通过优雅的信号滤波公式予以过滤，把大自然的声音驯化成平滑圆润的控制波形。这便是代码与真实造物发生的，最温柔的轻声细语。</p>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
+                <h4 class="text-lg font-medium mb-6 text-[var(--color-text-main)]">手记插图集</h4>
+                <div id="gallery-embedded" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+                <div class="mt-6 edit-overlay hidden">
+                    <button onclick="addNewGalleryItem('embedded')" class="w-full py-4 rounded-2xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-morandi-blue)] text-sm text-[var(--color-text-sub)] hover:text-[var(--color-text-main)] transition-all flex items-center justify-center gap-2">
+                        ➕ 添加新插图至本篇
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详情页：预留1 (交互美学) -->
+        <section id="page-r1" class="page-section hidden opacity-0 translate-y-8 max-w-3xl mx-auto">
+            <a href="javascript:void(0)" onclick="showPage('home')" class="back-btn">← 返回主页</a>
+            
+            <div class="relative w-full h-80 rounded-3xl overflow-hidden mb-8 group warm-shadow border border-[var(--color-border)]">
+                <img id="img-r1-banner" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80" alt="交互美学" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none edit-overlay">
+                    <button onclick="triggerImagePicker('img-r1-banner')" class="pointer-events-auto px-5 py-2.5 rounded-full bg-white/90 backdrop-blur-md text-sm font-medium text-[var(--color-text-main)] shadow-lg hover:bg-white transition-all flex items-center gap-2">
+                        📷 更换主图
+                    </button>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-light mb-8" data-key="p6-title" contenteditable="false">交互美学</h2>
+            <div class="prose max-w-none text-[var(--color-text-main)] font-light leading-relaxed space-y-6">
+                <p data-key="p6-p1" contenteditable="false">良好的反馈是造物对人极富礼貌的倾听。探寻按钮的反馈阻尼、呼吸灯的微小渐变，都是人与物品发生对话的媒介。摒弃机械死板的直线动画，寻找那些带着温度和自然物理惯性的动效过渡。</p>
+                <div class="p-6 bg-[var(--color-card-bg)] rounded-2xl text-center">$$MT = a + b \log_2 \left( \frac{2D}{W} \right)$$</div>
+                <p data-key="p6-p2" contenteditable="false">请开启编辑模式，双击这些文字来书写您在人机交互方面的思考，并随时点击最下方来插入您的交互设计手稿、手势流向图或实体原型照片。</p>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
+                <h4 class="text-lg font-medium mb-6 text-[var(--color-text-main)]">手记插图集</h4>
+                <div id="gallery-r1" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+                <div class="mt-6 edit-overlay hidden">
+                    <button onclick="addNewGalleryItem('r1')" class="w-full py-4 rounded-2xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-morandi-blue)] text-sm text-[var(--color-text-sub)] hover:text-[var(--color-text-main)] transition-all flex items-center justify-center gap-2">
+                        ➕ 添加新插图至本篇
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详情页：预留2 (材料工艺) -->
+        <section id="page-r2" class="page-section hidden opacity-0 translate-y-8 max-w-3xl mx-auto">
+            <a href="javascript:void(0)" onclick="showPage('home')" class="back-btn">← 返回主页</a>
+            
+            <div class="relative w-full h-80 rounded-3xl overflow-hidden mb-8 group warm-shadow border border-[var(--color-border)]">
+                <img id="img-r2-banner" src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80" alt="材料工艺" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none edit-overlay">
+                    <button onclick="triggerImagePicker('img-r2-banner')" class="pointer-events-auto px-5 py-2.5 rounded-full bg-white/90 backdrop-blur-md text-sm font-medium text-[var(--color-text-main)] shadow-lg hover:bg-white transition-all flex items-center gap-2">
+                        📷 更换主图
+                    </button>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-light mb-8" data-key="p7-title" contenteditable="false">材料工艺</h2>
+            <div class="prose max-w-none text-[var(--color-text-main)] font-light leading-relaxed space-y-6">
+                <p data-key="p7-p1" contenteditable="false">自然的馈赠始终包裹着手工造物的底层质地。在这里记录黄铜在空气中的缓慢氧化痕迹、木材切削时传来的松脂清香、抑或是极简水泥表面气孔留下的诗意瑕疵。当自然的有机材质和数字的冷色芯片契合在一起，便产生了解构主义下的造物张力。</p>
+                <div class="p-6 bg-[var(--color-card-bg)] rounded-2xl text-center">$$\varphi = \frac{1 + \sqrt{5}}{2} \approx 1.618$$</div>
+                <p data-key="p7-p2" contenteditable="false">在此处书写您日常选材时的探索心得。别忘了利用下方的附件区上传不同打磨工艺、天然木漆配方的对比照片，在沉淀知识的过程中丰富画卷。</p>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
+                <h4 class="text-lg font-medium mb-6 text-[var(--color-text-main)]">手记插图集</h4>
+                <div id="gallery-r2" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+                <div class="mt-6 edit-overlay hidden">
+                    <button onclick="addNewGalleryItem('r2')" class="w-full py-4 rounded-2xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-morandi-blue)] text-sm text-[var(--color-text-sub)] hover:text-[var(--color-text-main)] transition-all flex items-center justify-center gap-2">
+                        ➕ 添加新插图至本篇
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详情页：预留3 (灵感存档) -->
+        <section id="page-r3" class="page-section hidden opacity-0 translate-y-8 max-w-3xl mx-auto">
+            <a href="javascript:void(0)" onclick="showPage('home')" class="back-btn">← 返回主页</a>
+            
+            <div class="relative w-full h-80 rounded-3xl overflow-hidden mb-8 group warm-shadow border border-[var(--color-border)]">
+                <img id="img-r3-banner" src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=1200&q=80" alt="灵感存档" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none edit-overlay">
+                    <button onclick="triggerImagePicker('img-r3-banner')" class="pointer-events-auto px-5 py-2.5 rounded-full bg-white/90 backdrop-blur-md text-sm font-medium text-[var(--color-text-main)] shadow-lg hover:bg-white transition-all flex items-center gap-2">
+                        📷 更换主图
+                    </button>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-light mb-8" data-key="p8-title" contenteditable="false">灵感存档</h2>
+            <div class="prose max-w-none text-[var(--color-text-main)] font-light leading-relaxed space-y-6">
+                <p data-key="p8-p1" contenteditable="false">日常漫步于城市或丛林、亦或是在枕边半梦半醒时所闪过的碎片思绪。这些未成形的种子在漫长的时光沉淀中，或许正是某个极客项目的原点雏形。</p>
+                <div class="p-6 bg-[var(--color-card-bg)] rounded-2xl text-center">$$H(X) = -\sum_{i=1}^{n} P(x_i) \log_2 P(x_i)$$</div>
+                <p data-key="p8-p2" contenteditable="false">随时记录，无拘无束。在编辑模式下，将突发的思绪用文字保存下来。你还可以用手机拍下随手画在餐巾纸上的铅笔线稿、或者是软件流程草图，并在最下方追加保存，构建专属于您的灵感集散地。</p>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
+                <h4 class="text-lg font-medium mb-6 text-[var(--color-text-main)]">手记插图集</h4>
+                <div id="gallery-r3" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+                <div class="mt-6 edit-overlay hidden">
+                    <button onclick="addNewGalleryItem('r3')" class="w-full py-4 rounded-2xl border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-morandi-blue)] text-sm text-[var(--color-text-sub)] hover:text-[var(--color-text-main)] transition-all flex items-center justify-center gap-2">
+                        ➕ 添加新插图至本篇
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 极简微动效更换图片弹窗 -->
+    <div id="imageModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm hidden opacity-0 transition-all duration-300">
+        <div class="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-3xl p-8 max-w-md w-full mx-4 modal-shadow transform scale-95 transition-transform duration-300" id="imageModalContent">
+            <h3 class="text-xl font-medium mb-6 text-[var(--color-text-main)] flex items-center gap-2">
+                🎨 选择新的图片
+            </h3>
+            
+            <div class="space-y-6">
+                <!-- 方法 1：从电脑本地上传（保存到 IndexedDB） -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-sub)] mb-2">本地电脑上传</label>
+                    <label class="flex flex-col items-center justify-center border-2 border-dashed border-[var(--color-border)] rounded-2xl p-6 cursor-pointer hover:border-[var(--color-morandi-blue)] hover:bg-[var(--color-card-bg)]/30 transition-all">
+                        <svg class="w-8 h-8 text-[var(--color-text-sub)] mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span class="text-sm text-[var(--color-text-main)]">选择本地图片文件</span>
+                        <span class="text-[10px] text-[var(--color-text-sub)] mt-1">支持 PNG, JPG, WEBP (永久保存在浏览器内)</span>
+                        <input type="file" id="localFileInput" accept="image/*" class="hidden" onchange="handleLocalFileUpload(event)">
+                    </label>
+                </div>
+
+                <!-- 方法 2：贴入网络图片链接 -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-sub)] mb-2">输入网络图片 URL</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="webUrlInput" placeholder="https://example.com/image.jpg" class="flex-grow px-4 py-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] text-sm text-[var(--color-text-main)] focus:outline-none focus:border-[var(--color-morandi-blue)]">
+                        <button onclick="handleWebUrlSubmit()" class="px-5 py-3 rounded-2xl bg-[var(--color-morandi-blue)] text-white text-sm font-medium hover:opacity-90 transition-opacity">确认</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部取消控制 -->
+            <div class="mt-8 flex justify-end gap-3">
+                <button onclick="resetToDefaultImage()" class="mr-auto px-4 py-2 text-xs text-[var(--color-text-sub)] hover:text-red-500 transition-colors">恢复默认</button>
+                <button onclick="closeImagePicker()" class="px-5 py-2.5 rounded-full border border-[var(--color-border)] text-sm font-medium text-[var(--color-text-sub)] hover:bg-[var(--color-card-bg)] transition-all">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 极简页脚 -->
+    <footer class="w-full border-t border-[var(--color-border)] py-6 text-center text-xs text-[var(--color-text-sub)]">
+        保持双手温热，赋予思想生命。
+    </footer>
+
+    <script>
+        let isEditMode = false;
+        let activeImageElementId = null; // 记录当前正在编辑哪张图片
+        let db = null; // IndexedDB 实例
+
+        // 初始化 IndexedDB 数据库
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open("MakerSpaceImageDB", 1);
+                
+                request.onupgradeneeded = function(e) {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains("images")) {
+                        database.createObjectStore("images");
+                    }
+                };
+
+                request.onsuccess = function(e) {
+                    db = e.target.result;
+                    resolve(db);
+                };
+
+                request.onerror = function(e) {
+                    console.error("IndexedDB 初始化失败:", e);
+                    reject(e);
+                };
+            });
+        }
+
+        // 保存图片到 IndexedDB (可存 Blob、File 或 String)
+        function storeImage(key, data) {
+            if (!db) return Promise.reject("DB未初始化");
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(["images"], "readwrite");
+                const store = transaction.objectStore("images");
+                const request = store.put(data, key);
+
+                request.onsuccess = () => resolve();
+                request.onerror = (e) => reject(e);
+            });
+        }
+
+        // 从 IndexedDB 读取图片
+        function retrieveImage(key) {
+            if (!db) return Promise.resolve(null);
+            return new Promise((resolve) => {
+                const transaction = db.transaction(["images"], "readonly");
+                const store = transaction.objectStore("images");
+                const request = store.get(key);
+
+                request.onsuccess = function(e) {
+                    resolve(e.target.result);
+                };
+                request.onerror = function() {
+                    resolve(null);
+                };
+            });
+        }
+
+        // 移除 IndexedDB 中的图片
+        function removeImage(key) {
+            if (!db) return Promise.resolve();
+            return new Promise((resolve) => {
+                const transaction = db.transaction(["images"], "readwrite");
+                const store = transaction.objectStore("images");
+                const request = store.delete(key);
+                request.onsuccess = () => resolve();
+            });
+        }
+
+        // SPA 页面平滑无缝切换
+        function showPage(pageId) {
+            if (isEditMode) return; // 编辑模式下全面阻止页面跳转，防止编辑动作被打断
+
+            const sections = document.querySelectorAll('.page-section');
+            const target = document.getElementById(`page-${pageId}`);
+
+            if (!target) return;
+
+            sections.forEach(s => {
+                s.classList.add('opacity-0', 'translate-y-8');
+                setTimeout(() => s.classList.add('hidden'), 400);
+            });
+
+            setTimeout(() => {
+                target.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(() => {
+                    target.classList.remove('opacity-0', 'translate-y-8');
+                }, 50);
+            }, 400);
+        }
+
+        // 编辑模式全局控制
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const body = document.body;
+            const btn = document.getElementById('editBtn');
+            const dot = document.getElementById('editDot');
+            const text = document.getElementById('editText');
+            const editables = document.querySelectorAll('[contenteditable]');
+            const overlays = document.querySelectorAll('.edit-overlay');
+
+            if (isEditMode) {
+                body.classList.add('editing-mode');
+                btn.classList.add('bg-[var(--color-morandi-warm)]', 'text-white');
+                dot.classList.replace('bg-gray-400', 'bg-white');
+                text.textContent = "保存内容并锁定";
+                
+                editables.forEach(e => e.setAttribute('contenteditable', 'true'));
+                overlays.forEach(o => o.classList.remove('hidden'));
+            } else {
+                body.classList.remove('editing-mode');
+                btn.classList.remove('bg-[var(--color-morandi-warm)]', 'text-white');
+                dot.classList.replace('bg-white', 'bg-gray-400');
+                text.textContent = "开启编辑模式";
+                
+                editables.forEach(e => {
+                    e.setAttribute('contenteditable', 'false');
+                    const key = e.getAttribute('data-key');
+                    if (key) localStorage.setItem(`ws_save_${key}`, e.innerHTML);
+                });
+
+                overlays.forEach(o => o.classList.add('hidden'));
+
+                if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                    window.MathJax.typesetPromise();
+                }
+            }
+        }
+
+        // 唤醒更换图片选择弹窗
+        function triggerImagePicker(imgId) {
+            activeImageElementId = imgId;
+            const modal = document.getElementById('imageModal');
+            const modalContent = document.getElementById('imageModalContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        // 关闭图片选择窗
+        function closeImagePicker() {
+            const modal = document.getElementById('imageModal');
+            const modalContent = document.getElementById('imageModalContent');
+            
+            modalContent.classList.add('scale-95');
+            modal.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('webUrlInput').value = '';
+                document.getElementById('localFileInput').value = '';
+                activeImageElementId = null;
+            }, 300);
+        }
+
+        // 更新图片的实际渲染（智能判断来源是 Blob 对象还是文本 URL）
+        function applyImageToElement(imgElementId, data) {
+            const img = document.getElementById(imgElementId);
+            if (!img) return;
+
+            // 如果已有临时的 Blob 链接，需先释放，防止内存泄露
+            if (img.src.startsWith('blob:')) {
+                URL.revokeObjectURL(img.src);
+            }
+
+            if (data instanceof Blob) {
+                const objectURL = URL.createObjectURL(data);
+                img.src = objectURL;
+            } else if (typeof data === 'string' && data.trim() !== '') {
+                img.src = data;
+            } else {
+                // 回归原始默认占位图
+                const defaultBanners = {
+                    'img-maker-banner': 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=1200&q=80',
+                    'img-pcb-banner': 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+                    'img-print-banner': 'https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?auto=format&fit=crop&w=1200&q=80',
+                    'img-sw-banner': 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80',
+                    'img-embedded-banner': 'https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&w=1200&q=80',
+                    'img-r1-banner': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+                    'img-r2-banner': 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80',
+                    'img-r3-banner': 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=1200&q=80'
+                };
+                img.src = defaultBanners[imgElementId] || 'https://placehold.co/800x450/D5DFE2/3A4348?text=Maker+Media';
+            }
+        }
+
+        // 处理本地电脑文件上传
+        async function handleLocalFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                await storeImage(activeImageElementId, file);
+                applyImageToElement(activeImageElementId, file);
+                closeImagePicker();
+            } catch (err) {
+                console.error("图片保存失败:", err);
+            }
+        }
+
+        // 处理网络图片 URL 提交
+        async function handleWebUrlSubmit() {
+            const url = document.getElementById('webUrlInput').value.trim();
+            if (!url) return;
+
+            try {
+                await storeImage(activeImageElementId, url);
+                applyImageToElement(activeImageElementId, url);
+                closeImagePicker();
+            } catch (err) {
+                console.error("图片URL保存失败:", err);
+            }
+        }
+
+        // 恢复成原厂默认图片
+        async function resetToDefaultImage() {
+            try {
+                await removeImage(activeImageElementId);
+                applyImageToElement(activeImageElementId, null);
+                closeImagePicker();
+            } catch (err) {
+                console.error("图片重置失败:", err);
+            }
+        }
+
+        // 每一个详情篇章最底部的动态插图附件系统
+        function getGalleryKey(sectionId) {
+            return `gallery_items_${sectionId}`;
+        }
+
+        // 加载并渲染插图画廊
+        async function loadGallery(sectionId) {
+            const container = document.getElementById(`gallery-${sectionId}`);
+            if (!container) return;
+            container.innerHTML = '';
+
+            // 读取画廊的骨架结构
+            const itemsJson = localStorage.getItem(getGalleryKey(sectionId));
+            const items = itemsJson ? JSON.parse(itemsJson) : [];
+
+            for (const item of items) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'group relative bg-[var(--color-card-bg)] rounded-2xl overflow-hidden p-4 border border-[var(--color-border)] warm-shadow flex flex-col justify-between';
+                itemDiv.id = `gallery-card-${item.id}`;
+
+                // 准备插图节点
+                const imgElementId = `img-gallery-${item.id}`;
+                
+                // 拼接编辑模式覆盖工具
+                itemDiv.innerHTML = `
+                    <div class="relative aspect-video w-full rounded-xl overflow-hidden mb-4 border border-[var(--color-border)]/40">
+                        <img id="${imgElementId}" src="https://placehold.co/600x400/E6ECEF/727E85?text=Click+to+change+image" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 edit-overlay ${isEditMode ? '' : 'hidden'}">
+                            <button onclick="triggerImagePicker('${imgElementId}')" class="px-3 py-1.5 rounded-full bg-white text-xs font-medium text-[var(--color-text-main)] shadow hover:opacity-90">更替</button>
+                            <button onclick="removeGalleryItem('${sectionId}', '${item.id}')" class="px-3 py-1.5 rounded-full bg-red-500 text-white text-xs font-medium shadow hover:opacity-90">删除</button>
+                        </div>
+                    </div>
+                    <div class="text-sm font-light text-[var(--color-text-main)] text-center focus:outline-none" 
+                         data-key="caption-${item.id}" 
+                         contenteditable="${isEditMode}" 
+                         onblur="saveCaption('${item.id}', this.innerHTML)">
+                         ${item.caption}
+                    </div>
+                `;
+
+                container.appendChild(itemDiv);
+
+                // 读取 IndexedDB 数据源渲染对应图片
+                const storedData = await retrieveImage(imgElementId);
+                if (storedData) {
+                    applyImageToElement(imgElementId, storedData);
+                } else {
+                    // 如果该插图尚无内容，使用默认 Unsplash 占位图
+                    applyImageToElement(imgElementId, 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=600&q=80');
+                }
+            }
+        }
+
+        // 添加一个崭新的空白插图模块
+        async function addNewGalleryItem(sectionId) {
+            const key = getGalleryKey(sectionId);
+            const itemsJson = localStorage.getItem(key);
+            const items = itemsJson ? JSON.parse(itemsJson) : [];
+
+            const newItem = {
+                id: Date.now().toString(),
+                caption: '在此键入关于该插图的备注说明（双击编辑）'
+            };
+
+            items.push(newItem);
+            localStorage.setItem(key, JSON.stringify(items));
+
+            // 重新刷新局部视图
+            await loadGallery(sectionId);
+        }
+
+        // 删除插图项
+        async function removeGalleryItem(sectionId, itemId) {
+            if (!confirm('确定要删除这张手记插图吗？')) return;
+
+            const key = getGalleryKey(sectionId);
+            const itemsJson = localStorage.getItem(key);
+            let items = itemsJson ? JSON.parse(itemsJson) : [];
+
+            // 1. 过滤掉骨架数据
+            items = items.filter(i => i.id !== itemId);
+            localStorage.setItem(key, JSON.stringify(items));
+
+            // 2. 清理 IndexedDB 中该项挂载的静态图片大对象
+            const imgElementId = `img-gallery-${itemId}`;
+            await removeImage(imgElementId);
+            localStorage.removeItem(`ws_save_caption-${itemId}`);
+
+            // 3. 重新渲染
+            await loadGallery(sectionId);
+        }
+
+        // 异步保存插画注解
+        function saveCaption(itemId, htmlContent) {
+            localStorage.setItem(`ws_save_caption-${itemId}`, htmlContent);
+        }
+
+        // 启动总载入初始化
+        window.onload = async function() {
+            // A. 初始化 IndexedDB
+            try {
+                await initDB();
+            } catch (err) {
+                console.error("无法启用本地 IndexedDB，将使用网络图片源作为代替", err);
+            }
+
+            // B. 载入持久化过的文章文本内容
+            document.querySelectorAll('[contenteditable]').forEach(e => {
+                const key = e.getAttribute('data-key');
+                const saved = localStorage.getItem(`ws_save_${key}`);
+                if (saved) e.innerHTML = saved;
+            });
+
+            // C. 载入所有详情页顶部 Banner 的历史设置
+            const bannerIds = [
+                'img-maker-banner', 'img-pcb-banner', 'img-print-banner', 'img-sw-banner', 
+                'img-embedded-banner', 'img-r1-banner', 'img-r2-banner', 'img-r3-banner'
+            ];
+            for (const bId of bannerIds) {
+                const storedData = await retrieveImage(bId);
+                applyImageToElement(bId, storedData);
+            }
+
+            // D. 初始化渲染 8 大详情模块的附件插图集
+            const sectionsList = ['maker', 'pcb', 'print', 'sw', 'embedded', 'r1', 'r2', 'r3'];
+            for (const sec of sectionsList) {
+                await loadGallery(sec);
+            }
+
+            // E. LaTeX 全局渲染
+            if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                window.MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>
